@@ -1,0 +1,198 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{a4wide}
+
+\author{Thom Wiggers}
+\title{Samenvatting Security 2012--2013}
+
+\begin{document}
+
+\section{Security Goals}
+
+
+\begin{description}
+  \item[Confidentiality] Third parties cannot read what $A$ and $B$ are saying.
+  \item[Integrity] Third parties cannot modify the contents of the communication.
+  \item[Authenticity] $A$ and $B$ are certain about each other's identities.
+  \item[Availability] Third parties cannot prevent $A$ and $B$ from communicating.
+  \item[Non-repudiation] Someone cannot deny what they have communicated.
+  \item[Accountability] Reliale log of communication history.
+\end{description}
+
+\section{Crypto primitives}
+
+\begin{tabular}[h]{c||p{100pt}|l|l}
+  \bf \# Keys & \bf Name & \bf Key names & \bf Notation \\ \hline \hline
+  0 & Hash functions & --- & $h(m)$ \\ \hline
+  1 & Symmetric Crypto & Shared, secret & $K\left\{ m \right\}$  \\\hline
+  2 & Asymmetric Crypto (public key crypto) & Public \& private keypair & $\left\{ m \right\}_K$ \\
+\end{tabular}
+
+\section{Active Attacks}
+
+\subsection{Replay attack}
+
+Intercepted data is sent again. Countermeasures: nonces, timestamps.
+
+\subsection{Reflection attack}
+
+Data from one session is reused in another session, to for example make the
+target do encryption/decryption work.
+
+\subsection{Man-in-the-middle attacks}
+
+Also passive: relay attack. Active involves reencryption. countermeasure:
+strong authentication.
+
+\section{Cypher modes}
+
+\subsection{Electronic Code Book (ECB)}
+$m = m_0m_1m_2\cdots \rightarrow C = K\{m_0\},K\{m_1\},K\{m_2\}\cdots$.
+
+Attack vectors: occurrence frequency, swappping can go unnoticed easily.
+
+\subsection{Cypher Block Chaining (CBC)}
+
+\begin{align*}
+  c_0     &= K\{m_0 \oplus IV\} \\
+  c_{n+1} &= K\{m_{n+1} \oplus c_n\} \\
+\end{align*}
+
+$IV$ may be sent openly or be constant.
+
+One garbled block means two blocks are lost in decyphering. Last block
+can be used to verify integrity.
+
+\subsection{Output Feedback Mode (OFB)}
+
+First, pick a random number (Initialisation Vector, $IV$) and use it to
+create a keystream:
+
+\[ K\{IV\},K\{K\{IV\}\}, K\{K\{K\{IV\}\}\} \cdots \]
+
+Then XOR with incoming bitstream. Garbled bits are lost, but only those bits.
+If sender/receiver are out of sync, everything is lost.
+
+Variation: $c_n = m_n \oplus K\{IV + n\}$ (Counter mode).
+
+\subsection{Cipher Feedback (CFB)}
+
+\begin{align*}
+  c_0 &= IV \\
+  c_{n+1} &= K\{c_n\} \oplus m_{n+1}
+\end{align*}
+
+\section{Symmetric Crypto}
+
+\subsection{Basic Techniques}
+
+\begin{enumerate}
+
+  \item \textbf{Substitution}: Swapping characters from the alphabet. Key $K$
+    is the subsitution function.
+
+  \item \textbf{Transposition}: Changing positions of characters (by block).
+    $K$ is the position exchange function.
+
+  \item \textbf{One-time pad}: Take bitwise XOR of message with keystream.
+    $K$ is keystream of at least the same length as the message.
+
+\end{enumerate}
+
+One-time pads are sometimes generated using linear feedback shift registers. See
+slide 25.
+
+A downside of symmetric crypto is that one needs ${N \choose 2}
+= \frac{N(N-1)}{2}$ keys if $N$ people want to communicate pairwise securely.
+
+Also, if key $K$ is lost by $A$, $B$ is also affected.
+
+\subsection{Basic Protocols}
+
+\subsubsection{Integrity}
+
+\[
+  A \longrightarrow B : m, K_{AB}\{h(m)\}
+\]
+
+Hash function for efficiency.
+
+$B$ can verify integity by decrypting and comparing $h(m)$ with the hash he
+creates from $m$.
+
+\subsubsection{Confidentiality}
+
+\[ 
+  A \longrightarrow B : K_{AB}\left\{ m \right\}
+\]
+
+Only those with $K_{AB}$ can read this, obviously.
+
+When combined with integrity ($A \longrightarrow B : K\{m, K\{h(m)\}\}$) it is
+important to use different keys, and thus if one is compromised, both integrity
+and confidentiality are broken.
+
+\subsubsection{Authenticity}
+
+``Shared Secret'': You can be authenticated by something only you and the other
+party know. Problem: secret used in the clear.
+
+It is better to send riddles that can only be solved efficiently using the
+secret key. The riddle needs to be fresh every time (against replay attacks).
+Often achieved by using \emph{nonces}.
+
+\begin{align*}
+  A & \longrightarrow  B  : A, N_A             \\
+  B & \longrightarrow  B : K_{AB}\{N_A, N_B\} \\
+  A & \longrightarrow  B  : N_B                \\
+\end{align*}
+
+\section{Hashing}
+
+\subsection{Properties}
+
+\begin{description}
+
+  \item[Preimage Resistant (one-way)] Given hash value $x$, it should be 
+    hard to find $m$ with $h(m) = x$.
+
+  \item[Second preimage resistant] Given an $m$, it should be hard to find 
+    $m' \neq m$ with $h(m) = h(m')$.
+
+  \item[Collision resistant] It should be hard to find \emph{any} pair $m \neq
+    m'$ with $h(m) = h(m')$.
+
+\end{description}
+
+
+\subsection{Non-revealing commitment}
+
+e.g. for flipping coins one can use:
+
+\begin{align*}
+  A & \longrightarrow B : h(C_A, N_A) \\
+  B & \longrightarrow A : h(C_B,N_B)  \\
+  A & \longrightarrow B : C_A, N_A    \\
+  B & \longrightarrow A : C_B, N_B    \\
+\end{align*}
+
+(nonces are used to prevent cheating by lookup table - coin outcomes are very
+limited)
+
+\subsubsection{Lamport's hash}
+
+$C$ has for each user $A$ a pair $[n \in \mathbb{N}, h^n(\text{passwd}_A)]$.
+
+\begin{align*}
+  A & \rightarrow C : A \\
+  C & \rightarrow A : n \\
+  A &\rightarrow C  : h^{n-1}(\text{passwd}_A) = x
+\end{align*}
+
+$C$ can then verify the authenticity of $A$ by checking $h(x)
+= h^n(\text{passwd}_A)$. $C$ can also then set a new pair $[n-1,x]$ or
+$[n+1, h(h(x))]$.
+
+\end{document}
