@@ -4,6 +4,11 @@
 \usepackage{amsfonts}
 \usepackage{a4wide}
 
+\newcommand{\wmod}[1]{\text{\quad (mod }#1\text{)}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\egcd}{\operatorname{egcd}}
+
 \author{Thom Wiggers}
 \title{Samenvatting Security 2012--2013}
 
@@ -194,5 +199,54 @@ $C$ has for each user $A$ a pair $[n \in \mathbb{N}, h^n(\text{passwd}_A)]$.
 $C$ can then verify the authenticity of $A$ by checking $h(x)
 = h^n(\text{passwd}_A)$. $C$ can also then set a new pair $[n-1,x]$ or
 $[n+1, h(h(x))]$.
+
+\section{Asymmetric Crypto}
+
+Using two keys: one for decryption (private key, $K_d$) and one for encryption
+(public key, $K_e$).
+
+\begin{itemize}
+  \item Encryption: $\{m\}_{K_e} $
+  \item Decryption: $[c]_{K_d}$.
+\end{itemize}
+
+Identity function: 
+\[
+  [\{m\}_{K_e}]_{K_d} = m
+\]
+
+Though for some systems $\{[m]_{K_d}\}_{K_e} =m$ is also valid, this is not
+a requirement.
+
+\section{Number theory}
+
+\subsection{Equivalence classes}
+
+\[ \forall N \in \N, n \in \Z, m \in \Z 
+  \,[n \equiv m \wmod{N} \Leftrightarrow 
+      \text{ there is a } k \in \Z \text { with } n = m + k \cdot N]
+\]
+$\Z_N$ is the set of numbers modulo $N$. Thus 
+\[ \Z_N = \{ 0, 1, \dots N-1\} \]
+For every $m \in \Z$ we have $m \mod N \in \Z_N$.
+
+If a product modulo $N$ is 1, for instance, $4 \cdot 4 \equiv 1 \wmod{15}$, you
+can say $\frac{1}{4}=4 \wmod{15}$. For $\Z_p$ where $p$ is prime, every
+non-zero number $n \in \Z_p$ has an inverse $\frac{1}{n} \in \Z_p$.
+
+\subsection{Greatest Common Divisor}
+
+$\gcd(n,m) = $ greatest $k$ which divides both $n$ and $m$. If $\gcd(n,m) = 1$, one
+calls $n,m$ relative prime.
+
+\[ 
+  \gcd (n,m) = \begin{cases}
+    n & m=0 \\
+    \gcd(m, n \operatorname{mod} m) & \text{otherwise}\\
+  \end{cases}
+\]
+
+
+
 
 \end{document}
