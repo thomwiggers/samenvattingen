@@ -51,14 +51,14 @@ target do encryption/decryption work.
 Also passive: relay attack. Active involves reencryption. countermeasure:
 strong authentication.
 
-\section{Cypher modes}
+\section{Cipher modes}
 
 \subsection{Electronic Code Book (ECB)}
 $m = m_0m_1m_2\cdots \rightarrow C = K\{m_0\},K\{m_1\},K\{m_2\}\cdots$.
 
 Attack vectors: occurrence frequency, swappping can go unnoticed easily.
 
-\subsection{Cypher Block Chaining (CBC)}
+\subsection{Cipher Block Chaining (CBC)}
 
 \begin{align*}
   c_0     &= K\{m_0 \oplus IV\} \\
@@ -67,7 +67,7 @@ Attack vectors: occurrence frequency, swappping can go unnoticed easily.
 
 $IV$ may be sent openly or be constant.
 
-One garbled block means two blocks are lost in decyphering. Last block
+One garbled block means two blocks are lost in deciphering. Last block
 can be used to verify integrity.
 
 \subsection{Output Feedback Mode (OFB)}
