@@ -254,7 +254,7 @@ calls $n,m$ relative prime.
 \[
   \egcd(m,n) = \begin{cases}
     \langle 1,0 \rangle & n = 0 \\
-    \langle y, x - (y \cdot (m \operatorname{div} n))\rangle & \langle x, y \rangle = \egcd(m, n \mod n) \\
+    \langle y, x - (y \cdot (n \operatorname{div} m))\rangle & \langle x, y \rangle = \egcd(n, m \mod n) \\
   \end{cases}
 \]
 
