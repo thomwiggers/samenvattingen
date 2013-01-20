@@ -234,6 +234,9 @@ If a product modulo $N$ is 1, for instance, $4 \cdot 4 \equiv 1 \wmod{15}$, you
 can say $\frac{1}{4}=4 \wmod{15}$. For $\Z_p$ where $p$ is prime, every
 non-zero number $n \in \Z_p$ has an inverse $\frac{1}{n} \in \Z_p$.
 
+A finite cyclic group often has a generator $g$ that $g^n = k$ so that $k$ can become
+any number in the group.
+
 \subsection{Greatest Common Divisor}
 
 $\gcd(n,m) = $ greatest $k$ which divides both $n$ and $m$. If $\gcd(n,m) = 1$, one
@@ -246,7 +249,104 @@ calls $n,m$ relative prime.
   \end{cases}
 \]
 
+\subsection{Extended GCD}
 
+\[
+  \egcd(m,n) = \begin{cases}
+    \langle 1,0 \rangle & n = 0 \\
+    \langle y, x - (y \cdot (m \operatorname{div} n))\rangle & \langle x, y \rangle = \egcd(m, n \mod n) \\
+  \end{cases}
+\]
+
+Results in the solutions $a,b$ for $a \cdot m + b \cdot n = \gcd(m,n)$.
+
+\section{RSA}
+
+RSA has a public key $e$, a private key $d$ and a modulo $n=p\cdot q$. \\
+Public key: $(n, e)$\\
+Private key: $(n,d)$ \\
+
+\subsection{RSA key creation}
+\begin{enumerate}
+  \item Pick two primes $p$ and $q$. $n=pq$
+  \item Calculate $\phi = (p-1)(q-1)$.
+  \item Pick $e$ from $\Z^*_\phi$.
+  \item Calculate $d$ from $\frac{1}{e} \in \Z^*_\phi$ using $\egcd(\phi,e)$.
+\end{enumerate}
+
+\subsection{Encryption / Decryption}
+Encrypt using RSA by $c = m^e \mod n$\\
+Decrypt using $m = c^d \mod n$.
+
+\subsection{Signatures with RSA}
+
+\[
+  A \longrightarrow B : m, [h(m)]_{d_A}
+\]
+
+Works because RSA is symmetric.
+
+\subsubsection{Blind signatures}
+
+\begin{enumerate}
+  \item $A$ computes $m' = r^e \cdot m \mod n$, where $r$ is a random number, and gives
+    this to $B$.
+  \item $B$ signs $m'$, giving $k = [m']^d \mod n$ to $A$.
+  \item $A$ computes $\frac{k}{r} = \frac{r^{ed} \cdot m^d}{r} = \frac{r \cdot m^d}{r} = m^d \mod n$
+\end{enumerate}
+
+Can be used for anonymous signatures on e-cash, e-voting\dots
+
+\subsection{Certificates}
+A certificate is a public key that has been signed by a thrusted third party.
+
+\section{Diffie-Hellman Key Exchange}
+
+Using a generator $g$ in a finite cyclic group:
+
+\begin{align*}
+  A &\longrightarrow B: A, g^{s_A} \\
+  B &\longrightarrow A: B, g^{s_B} \\
+\end{align*}
+
+Then $K_{AB} = g^{s_A s_B} = (g^{s_A})^{s_B} = (g^{s_A})^{s_B}$.
+
+This is not authentication!
+
+\section{El-Gamal}
+Fix a generator $g \in G$ of size $N$. \\
+Private key: $n \in \mathbb{N}$ with $n < N$. \\
+Public key: $h = g^n \in G$.
+
+\subsection{Encryption / Decryption}
+\subsubsection{Encryption}
+
+\begin{enumerate}
+  \item Represent message as $m \in G$.
+  \item Choose a random $r < N$.
+  \item $\{m\}_h = (g^r, m \cdot h^r)$.
+\end{enumerate}
+
+\subsubsection{Decryption}
+\begin{enumerate}
+  \item Ciphertext $c = (c_1,c_2)$ with $c_i \in G$.
+  \item \[
+      [(c_1, c_2)]_n = \frac{c_2}{(c_1)^n} = \frac{m \cdot h^r}{(g^r)^n} = \frac{m \cdot (g^n)^r}{(g^r)^n} = m
+    \]
+\end{enumerate}
+
+
+\subsubsection{Signatures}
+
+Choose random $r < p-1$ in $\Z^*_p$ with $\gcd(r,p-1) = 1$ and then:
+\[
+  \operatorname{sign}_n(m) = \left( g^r, \frac{H(m) - n \cdot g^r}{r} \mod p-1 \right)
+\]
+
+Verification of signature $(s_1, s_2)$:
+\[
+  g^{H(m)} \overset{??}{=} s_1^{s_2}, h^{s_1}
+\]
 
 
 \end{document}
