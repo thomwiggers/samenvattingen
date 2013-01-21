@@ -150,7 +150,7 @@ Often achieved by using \emph{nonces}.
 
 \begin{align*}
   A & \longrightarrow  B  : A, N_A             \\
-  B & \longrightarrow  B : K_{AB}\{N_A, N_B\} \\
+  B & \longrightarrow  A : K_{AB}\{N_A, N_B\} \\
   A & \longrightarrow  B  : N_B                \\
 \end{align*}
 
@@ -244,6 +244,7 @@ calls $n,m$ relative prime.
 
 \[ 
   \gcd (n,m) = \begin{cases}
+    \gcd(m,n) & m > n \\
     n & m=0 \\
     \gcd(m, n \operatorname{mod} m) & \text{otherwise}\\
   \end{cases}
@@ -252,9 +253,10 @@ calls $n,m$ relative prime.
 \subsection{Extended GCD}
 
 \[
-  \egcd(m,n) = \begin{cases}
-    \langle 1,0 \rangle & n = 0 \\
-    \langle y, x - (y \cdot (n \operatorname{div} m))\rangle & \langle x, y \rangle = \egcd(n, m \mod n) \\
+  \egcd(n,m) = \begin{cases}
+    \egcd(m,n) & m > n \\
+    \langle 1,0 \rangle & n \mod m = 0 \\
+    \langle y, x - (y \cdot (n \operatorname{div} m))\rangle & \langle x, y \rangle = \egcd(m, n \mod m) \\
   \end{cases}
 \]
 
