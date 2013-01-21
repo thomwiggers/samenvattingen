@@ -136,7 +136,7 @@ creates from $m$.
 Only those with $K_{AB}$ can read this, obviously.
 
 When combined with integrity ($A \longrightarrow B : K\{m, K\{h(m)\}\}$) it is
-important to use different keys, and thus if one is compromised, both integrity
+important to use different keys, because otherwise if $K$ is compromised, both integrity
 and confidentiality are broken.
 
 \subsubsection{Authenticity}
@@ -271,9 +271,9 @@ Private key: $(n,d)$ \\
 \subsection{RSA key creation}
 \begin{enumerate}
   \item Pick two primes $p$ and $q$. $n=pq$
-  \item Calculate $\phi = (p-1)(q-1)$.
-  \item Pick $e$ from $\Z^*_\phi$.
-  \item Calculate $d$ from $\frac{1}{e} \in \Z^*_\phi$ using $\egcd(\phi,e)$.
+  \item Calculate $\phi(n) = (p-1)(q-1)$.
+  \item Pick $e$ from $\Z^*_{\phi(n)}$.
+  \item Calculate $d$ from $\frac{1}{e} \in \Z^*_{\phi(n)}$ using $\egcd(\phi(n),e)$.
 \end{enumerate}
 
 \subsection{Encryption / Decryption}
@@ -286,7 +286,8 @@ Decrypt using $m = c^d \mod n$.
   A \longrightarrow B : m, [h(m)]_{d_A}
 \]
 
-Works because RSA is symmetric.
+Works because RSA is symmetric and since only $A$ has access to $d$, only he
+can have encrypted it.
 
 \subsubsection{Blind signatures}
 
@@ -347,7 +348,7 @@ Choose random $r < p-1$ in $\Z^*_p$ with $\gcd(r,p-1) = 1$ and then:
 
 Verification of signature $(s_1, s_2)$:
 \[
-  g^{H(m)} \overset{??}{=} s_1^{s_2}, h^{s_1}
+  g^{H(m)} \overset{??}{=} s_1^{s_2} \cdot h^{s_1}
 \]
 
 
