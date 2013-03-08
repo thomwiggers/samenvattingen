@@ -1,0 +1,107 @@
+Aanpassen semantiek case study
+==============================
+
+Kijken naar java:
+break, continue, try/catch
+
+
+Break:
+------
+
+..;
+..;
+
+while b do 
+   ..
+   break
+   ..;
+..; hier verder als break;
+
+
+..;
+..;
+
+Continue:
+---------
+
+while b do 
+   ..
+   continue // terugspringen naar begin van huidige while lus
+   ..;
+..; 
+
+Past niet in natuurlijke semantiek van <S, s> -> s'.
+
+Je moet aan S in <while b do S>  informatie toevoegen over optreden break/continue in S.
+En er moet in bepaalde gevallen spul overgeslagen worden.
+
+while + break
+=============
+
+S ::= skip | x := a | S1;S2 | if b then S1 else S2 | while b do S | break
+
+We voegen een breaking indicator toe: <S, s> -> (s', b)
+
+<skip, s>  -> (s, 0) 
+<x:= a,s>  -> (s[x |-> A[[a]] s ], 0)
+<break, s> -> (s, 1)
+
+We gaan zorgen dat de compositie alles overslaat als er gebreakt wordt. 
+
+
+ <S1, s> -> (s', 0)       <S2, s'> -> (s'', b)
+-----------------------------------------------
+              <S1;S2, s> -> (s'', b)
+              
+  <S1, s> -> (s', 1)
+---------------------
+ <S1;S2, s> -> (s',1)
+ 
+ 
+If statements propageren de break status gewoon:
+
+        <S1, s> -> (s', b) 
+------------------------------------ [if tt]
+<if b then S1 else S2, s> -> (s', b)
+
+        <S2, s> -> (s', b) 
+------------------------------------ [if ff]
+<if b then S1 else S2, s> -> (s', b)
+
+
+While statements:
+
+<while b do S, s> -> (s, 0) [while ff] (axioma)
+
+
+Non-breaking:                                      |----- altijd 0, maar b zodat alles erop past 
+                                                   |      (controleerbaarheid)
+<S, s> -> (s', 0)      <while b do S, s'> -> (s'', b)
+----------------------------------------------------- [while tt]
+             <while b do S, s> -> (s'', 0)
+
+Breaking:
+        <S, s> -> (s', 1)
+------------------------------- [while tt]
+  <while b do S, s> -> (s, 0)
+
+
+Exceptions
+==========
+
+S ::= skip | x := a | S1;S2 | if b then S1 else S2 | while b do S | throw e | try S1 catch e do S2
+e :   labels
+
+Verschillende e's?
+
+try ( try S1 catch e' do S') catch e'' do S''
+
+Moet dus rekening houden met soort e, en dat try mogelijk niet catch moet uitvoeren, ook als een e gegooid wordt.
+
+We voegen een exceptiestatus toe: <S, s> -> (s', E)
+
+E ∋ labels U {0}
+
+
+
+
