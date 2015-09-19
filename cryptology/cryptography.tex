@@ -1,0 +1,534 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{a4wide}
+
+\newcommand{\wmod}[1]{\pmod{#1}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\Z}{\ZZ}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\N}{\NN}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\egcd}{\operatorname{xgcd}}
+\newcommand{\xgcd}{\operatorname{xgcd}}
+
+\newcommand{\ZZx}[1]{(\ZZ_{/#1})^\times}
+
+\author{Thom Wiggers}
+\title{Lecture notes Cryptology 2015}
+
+\begin{document}
+\maketitle
+
+\section{Lecture 1 and 2}
+
+Cryptology consists of cryptography (constructive) and cryptanalysis (destructive).
+
+\subsection{Modular arithmetic}
+
+$\ZZ$ is the integers $\{\dots, -1, 0, 1, \dots\}$.
+
+$\ZZ/n$ is the residue class of $\ZZ$ modulo $n$.
+
+$$\ZZ/6 = \{0, 1, 2, 3, 4, 5, 6\} = \{-2, -1, 0, 1, 2, 3\}$$
+
+We use integers to represent classes, so $0$ stands for the set of integers
+congruent to $0 \mod 6$, i.e., $\{0, 6, 12, 18, \dots, -6, -12, \dots\}$.
+
+$7 \equiv 1 \pmod{6}$ ($\hat{=} 7$ is congruent to $1 \pmod{6})$.
+
+We usually want the samllest representative on the right, depends on the set chosen,
+e.g. $17 \equiv 5 \equiv -1 \mod 6$.
+
+\subsection{Multiply mod $n$}
+
+When computing $a \cdot b \mod n$ we can compute and then reduce or reduce at any intermediate
+step.
+
+\[ 17 \cdot 35 \equiv -1 \cdot -1 \equiv 1 \pmod{6} \]
+
+This is especially important for exponentiation $a^b \pmod{n}$.
+
+\subsubsection{Square and multiply}
+
+\begin{verbatim}
+c = a
+l = length of b as binary string
+for i in reversed(range(l-2)):
+  c = c^2 mod n
+  if b_i == 1:
+    c = c * a mod n
+return c
+\end{verbatim}
+
+\subsection{Inverse mod $n$}
+
+Divide equation mod 7 by 4, this means undoing a multiplication by 4, i.e. find
+an integer mod 7 such that $a \cdot 4 \equiv 1 \pmod 7 = a^{-1} \equiv 4 \pmod
+7$. Here $a \equiv 2 \pmod{7}$ ($2 \cdot 4 \equiv 8 \equiv 1 \pmod{7})$.
+
+In general, use the Extended Euclidian Algorithm ($\xgcd$) to compute $a$.
+
+\[
+  \egcd(n,m) = \begin{cases}
+    \egcd(m,n) & m > n \\
+    \langle 1,0 \rangle & n \mod m = 0 \\
+    \langle y, x - (y \cdot (n \operatorname{div} m))\rangle & \langle x, y \rangle = \egcd(m, n \mod m) \\
+  \end{cases}
+\]
+
+See \ref{sec:rsaexample} for an example how to write this.
+
+Inverses do not exist if the numbers are not coprime, e.g. $4$ is not invertible
+mod 6 (common factor 2).
+
+The set of invertible integers mod $n$ is denoted $\ZZx{n}$. Example: 
+$\ZZx{7} = \{1, 2, 3, 4, 5, 6\}$, with inverses: $1^{-1} \equiv 1$, 
+$2^{-1} \equiv 4$, $3^{-1} \equiv 5$, $6^{-1} \equiv 6$. These
+are exactly the integers coprime 7.
+
+$\ZZx{6} = \{1, 5\}$.
+
+$\ZZx{p} = \{1, 2, \dots, p-1\}$ for $p$ prime.
+
+Eulers phi gives the size of $|\ZZx{n}| = \phi(n)$.
+
+$\phi(7) = 6, \phi(6) = 2$.
+
+\[ \phi(p) = p-1 \text{ for $p$ prime} \]
+
+\[ \phi(pq) = (p-1)(q-1) \text{ for $p, q$ prime}\]
+
+\[ \phi(p^b) = p^b - p^{b-1} \]
+
+\[ n = \prod\limits_{i=0}^{l-1} p_i^{e_i}, p_i \ne p_j \text{ then } \phi(n) = \prod (p_i^{e_i} - p_i^{e_i -1}) \]
+
+\subsection{Lagrange's Theorem}
+
+Let $G$ be a finite group of size $|G| = l$ then for any element $a \in G$ we have $a^l = 1$, where
+$1$ is the neutral element and $G$ is written multiplicatively.
+
+eg. $a^6 \equiv 1 \pmod{7}$ for $a \in \ZZx{7}$.
+
+\section{RSA}
+
+Pick two large primes $p, q$, with $p \ne q$. Put $n = pq$ and compute $\phi(n) = (p-1)(q-1)$.
+Pick an $e$ coprime $\phi(n)$. Compute $d \equiv e^{-1} \pmod{\phi(n)}$ using $\xgcd$.
+
+\subsection{RSA parameters example}\label{sec:rsaexample}
+
+$p = 5, q = 7, n = 5 \cdot 7 = 35, \phi(35) = (5 - 1)(7-1) = 24$. Pick $e = 5$, $\gcd(5, 24) = 1$.
+$5^{-1} \equiv 5 \pmod{24}$ so $d=5$.
+
+Other option $e = 7$ with $\xgcd$:
+
+$$\begin{array}{cccr}
+    24 & 1 & 0 &                              \\
+    7  & 0 & 1 & \text{quotient 24 div 7 = 3} \\
+    \cline{1-3}
+    3  & 1 & -3 & 7 \operatorname{div} 3 = 2 \\
+    \cline{1-3}
+    1 & -2 & 7 & \\
+    r & a  & b &
+\end{array}$$
+
+Every row satisfies $r = 24 \cdot a + 7 \cdot b$.
+
+Then $p_k = (5, 35), \, s_k = 5$ (or $(7, 35), d=7$).
+
+\subsection{Encryption}
+Message $m < n, m \in \NN$.
+
+\[ c \equiv m^e \pmod{n} \]
+
+\subsection{Decryption}
+
+\[ m \equiv c^d \pmod{n} \]
+
+This works because $m' \equiv c^d \equiv m^{e^d} \equiv m^{ed}$ where
+$ed \equiv 1 \pmod{\phi(n)}$ i.e. $1 + k\phi(n)$ for some $k$.
+\[ m' \equiv m^{1 + k \phi(n)} \equiv m \cdot 1 \pmod{n} \] via Lagrange:
+in $\ZZx{n}$, $m^{\phi(n)} \equiv 1 \pmod{n}$.
+
+Check that $m^{1 + k\phi(n)} \equiv m \pmod{n}$ even when $\gcd(m, n) \ne 1$.
+
+To show this we use the \emph{Chinese Remainder Theorem}.
+
+$m \equiv 0 \pmod{p}, m \equiv a \pmod{q}$, $a \ne 0$.
+
+Then $m^{ed} \equiv 0^{ed} \equiv 0 \pmod{p}$. In $\ZZx{q}$ we 
+have $a^{q-1} \equiv 1 \pmod{q}$, thus $m^{ed} \equiv a^{1 + k\phi(n)} \equiv a^{1 + k(q-1)(p-1)}
+\equiv a \cdot (a^{q-1})^{p-1} \equiv a \cdot (1)^{p-1} \equiv a \pmod{q}$.
+
+So:
+\begin{align*}
+    m^{ed} &\equiv 0 \equiv m \pmod p \\
+    m^{ed} &\equiv a \equiv m \pmod q 
+\end{align*}
+thus the CRT gives $m^{ed} \equiv m \pmod{n}$.
+
+For the case $0^{ed} \equiv 0 \pmod{n}$.
+
+So RSA gives $m' = m$.
+
+\subsection{RSA-CRT}
+
+For fast encryption, we choose a small $e$ when generating the key.
+
+Choosing small $d$ gives Eve your key, but we can decrypt faster if we
+use RSA-CRT.
+
+Compute \begin{align*}
+    c^d \equiv m_p \pmod p \\
+    c^d \equiv m_q \pmod q
+\end{align*}
+
+This is faster because the operands are smaller (naively\footnote{``Naively''
+because Karatsuba double-length multiplication costs only 3 times as much and
+for very long integers the FFT takes only twice as long} this saves a factor of
+$4$ in each computation, do this twice, so save a factor of 2. Combine $m_p$ and
+$m_q$ using CRT to get m, this needs just one multiplication given $u = p^{-1}
+\pmod q$, $v = q^{-1} \pmod p$. Then $m = m_p \cdot q \cdot v + p \cdot u \cdot
+m_q$.
+
+\section {Security course}
+\section{Security Goals}
+
+\begin{description}
+  \item[Confidentiality] Third parties cannot read what $A$ and $B$ are saying.
+  \item[Integrity] Third parties cannot modify the contents of the communication.
+  \item[Authenticity] $A$ and $B$ are certain about each other's identities.
+  \item[Availability] Third parties cannot prevent $A$ and $B$ from communicating.
+  \item[Non-repudiation] Someone cannot deny what they have communicated.
+  \item[Accountability] Reliable log of communication history.
+\end{description}
+
+\section{Crypto primitives}
+
+\begin{tabular}[h]{c||p{100pt}|l|l}
+  \bf \# Keys & \bf Name & \bf Key names & \bf Notation \\ \hline \hline
+  0 & Hash functions & --- & $h(m)$ \\ \hline
+  1 & Symmetric Crypto & Shared, secret & $K\left\{ m \right\}$  \\\hline
+  2 & Asymmetric Crypto (public key crypto) & Public \& private keypair & $\left\{ m \right\}_K$ \\
+\end{tabular}
+
+\section{Active Attacks}
+
+\subsection{Replay attack}
+
+Intercepted data is sent again. Countermeasures: nonces, timestamps.
+
+\subsection{Reflection attack}
+
+Data from one session is reused in another session, to for example make the
+target do encryption/decryption work.
+
+\subsection{Man-in-the-middle attacks}
+
+Also passive: relay attack. Active involves reencryption. countermeasure:
+strong authentication.
+
+\section{Cipher modes}
+
+\subsection{Electronic Code Book (ECB)}
+$m = m_0m_1m_2\cdots \rightarrow C = K\{m_0\},K\{m_1\},K\{m_2\}\cdots$.
+
+Attack vectors: occurrence frequency, swappping can go unnoticed easily.
+
+\subsection{Cipher Block Chaining (CBC)}
+
+\begin{align*}
+  c_0     &= K\{m_0 \oplus IV\} \\
+  c_{n+1} &= K\{m_{n+1} \oplus c_n\} \\
+\end{align*}
+
+$IV$ may be sent openly or be constant.
+
+One garbled block means two blocks are lost in deciphering. Last block
+can be used to verify integrity.
+
+\subsection{Output Feedback Mode (OFB)}
+
+First, pick a random number (Initialisation Vector, $IV$) and use it to
+create a keystream:
+
+\[ K\{IV\},K\{K\{IV\}\}, K\{K\{K\{IV\}\}\} \cdots \]
+
+Then XOR with incoming bitstream. Garbled bits are lost, but only those bits.
+If sender/receiver are out of sync, everything is lost.
+
+Variation: $c_n = m_n \oplus K\{IV + n\}$ (Counter mode).
+
+\subsection{Cipher Feedback (CFB)}
+
+\begin{align*}
+  c_0 &= IV \\
+  c_{n+1} &= K\{c_n\} \oplus m_{n+1}
+\end{align*}
+
+\section{Symmetric Crypto}
+
+\subsection{Basic Techniques}
+
+\begin{enumerate}
+
+  \item \textbf{Substitution}: Swapping characters from the alphabet. Key $K$
+    is the subsitution function.
+
+  \item \textbf{Transposition}: Changing positions of characters (by block).
+    $K$ is the position exchange function.
+
+  \item \textbf{One-time pad}: Take bitwise XOR of message with keystream.
+    $K$ is keystream of at least the same length as the message.
+
+\end{enumerate}
+
+One-time pads are sometimes generated using linear feedback shift registers. See
+slide 25.
+
+A downside of symmetric crypto is that one needs ${N \choose 2}
+= \frac{N(N-1)}{2}$ keys if $N$ people want to communicate pairwise securely.
+
+Also, if key $K$ is lost by $A$, $B$ is also affected.
+
+\subsection{Basic Protocols}
+
+\subsubsection{Integrity}
+
+\[
+  A \longrightarrow B : m, K_{AB}\{h(m)\}
+\]
+
+Hash function for efficiency.
+
+$B$ can verify integity by decrypting and comparing $h(m)$ with the hash he
+creates from $m$.
+
+\subsubsection{Confidentiality}
+
+\[ 
+  A \longrightarrow B : K_{AB}\left\{ m \right\}
+\]
+
+Only those with $K_{AB}$ can read this, obviously.
+
+When combined with integrity ($A \longrightarrow B : K\{m, K\{h(m)\}\}$) it is
+important to use different keys, because otherwise if $K$ is compromised, both integrity
+and confidentiality are broken.
+
+\subsubsection{Authenticity}
+
+``Shared Secret'': You can be authenticated by something only you and the other
+party know. Problem: secret used in the clear.
+
+It is better to send riddles that can only be solved efficiently using the
+secret key. The riddle needs to be fresh every time (against replay attacks).
+Often achieved by using \emph{nonces}.
+
+\begin{align*}
+  A & \longrightarrow  B  : A, N_A             \\
+  B & \longrightarrow  A : K_{AB}\{N_A, N_B\} \\
+  A & \longrightarrow  B  : N_B                \\
+\end{align*}
+
+\section{Hashing}
+
+\subsection{Properties}
+
+\begin{description}
+
+  \item[Preimage Resistant (one-way)] Given hash value $x$, it should be 
+    hard to find $m$ with $h(m) = x$.
+
+  \item[Second preimage resistant] Given an $m$, it should be hard to find 
+    $m' \neq m$ with $h(m) = h(m')$.
+
+  \item[Collision resistant] It should be hard to find \emph{any} pair $m \neq
+    m'$ with $h(m) = h(m')$.
+
+\end{description}
+
+
+\subsection{Non-revealing commitment}
+
+e.g. for flipping coins one can use:
+
+\begin{align*}
+  A & \longrightarrow B : h(C_A, N_A) \\
+  B & \longrightarrow A : h(C_B,N_B)  \\
+  A & \longrightarrow B : C_A, N_A    \\
+  B & \longrightarrow A : C_B, N_B    \\
+\end{align*}
+
+(nonces are used to prevent cheating by lookup table - coin outcomes are very
+limited)
+
+\subsubsection{Lamport's hash}
+
+$C$ has for each user $A$ a pair $[n \in \mathbb{N}, h^n(\text{passwd}_A)]$.
+
+\begin{align*}
+  A & \rightarrow C : A \\
+  C & \rightarrow A : n \\
+  A &\rightarrow C  : h^{n-1}(\text{passwd}_A) = x
+\end{align*}
+
+$C$ can then verify the authenticity of $A$ by checking $h(x)
+= h^n(\text{passwd}_A)$. $C$ can also then set a new pair $[n-1,x]$ or
+$[n+1, h(h(x))]$.
+
+\section{Asymmetric Crypto}
+
+Using two keys: one for decryption (private key, $K_d$) and one for encryption
+(public key, $K_e$).
+
+\begin{itemize}
+  \item Encryption: $\{m\}_{K_e} $
+  \item Decryption: $[c]_{K_d}$.
+\end{itemize}
+
+Identity function: 
+\[
+  [\{m\}_{K_e}]_{K_d} = m
+\]
+
+Though for some systems $\{[m]_{K_d}\}_{K_e} =m$ is also valid, this is not
+a requirement.
+
+\section{Number theory}
+
+\subsection{Equivalence classes}
+
+\[ \forall N \in \N, n \in \Z, m \in \Z 
+  \,[n \equiv m \wmod{N} \Leftrightarrow 
+      \text{ there is a } k \in \Z \text { with } n = m + k \cdot N]
+\]
+$\Z_N$ is the set of numbers modulo $N$. Thus 
+\[ \Z_N = \{ 0, 1, \dots N-1\} \]
+For every $m \in \Z$ we have $m \mod N \in \Z_N$.
+
+If a product modulo $N$ is 1, for instance, $4 \cdot 4 \equiv 1 \wmod{15}$, you
+can say $\frac{1}{4}=4 \wmod{15}$. For $\Z_p$ where $p$ is prime, every
+non-zero number $n \in \Z_p$ has an inverse $\frac{1}{n} \in \Z_p$.
+
+A finite cyclic group often has a generator $g$ that $g^n = k$ so that $k$ can become
+any number in the group.
+
+\subsection{Greatest Common Divisor}
+
+$\gcd(n,m) = $ greatest $k$ which divides both $n$ and $m$. If $\gcd(n,m) = 1$, one
+calls $n,m$ relative prime.
+
+\[ 
+  \gcd (n,m) = \begin{cases}
+    \gcd(m,n) & m > n \\
+    n & m=0 \\
+    \gcd(m, n \operatorname{mod} m) & \text{otherwise}\\
+  \end{cases}
+\]
+
+\subsection{Extended GCD}
+
+\[
+  \egcd(n,m) = \begin{cases}
+    \egcd(m,n) & m > n \\
+    \langle 1,0 \rangle & n \mod m = 0 \\
+    \langle y, x - (y \cdot (n \operatorname{div} m))\rangle & \langle x, y \rangle = \egcd(m, n \mod m) \\
+  \end{cases}
+\]
+
+Results in the solutions $a,b$ for $a \cdot m + b \cdot n = \gcd(m,n)$.
+
+\section{RSA}
+
+RSA has a public key $e$, a private key $d$ and a modulo $n=p\cdot q$. \\
+Public key: $(n, e)$\\
+Private key: $(n,d)$ \\
+
+\subsection{RSA key creation}
+\begin{enumerate}
+  \item Pick two primes $p$ and $q$. $n=pq$
+  \item Calculate $\phi(n) = (p-1)(q-1)$.
+  \item Pick $e$ from $\Z^*_{\phi(n)}$.
+  \item Calculate $d$ from $\frac{1}{e} \in \Z^*_{\phi(n)}$ using $\egcd(\phi(n),e)$.
+\end{enumerate}
+
+\subsection{Encryption / Decryption}
+Encrypt using RSA by $c = m^e \mod n$\\
+Decrypt using $m = c^d \mod n$.
+
+\subsection{Signatures with RSA}
+
+\[
+  A \longrightarrow B : m, [h(m)]_{d_A}
+\]
+
+Works because RSA is symmetric and since only $A$ has access to $d$, only he
+can have encrypted it.
+
+\subsubsection{Blind signatures}
+
+\begin{enumerate}
+  \item $A$ computes $m' = r^e \cdot m \mod n$, where $r$ is a random number, and gives
+    this to $B$.
+  \item $B$ signs $m'$, giving $k = [m']^d \mod n$ to $A$.
+  \item $A$ computes $\frac{k}{r} = \frac{r^{ed} \cdot m^d}{r} = \frac{r \cdot m^d}{r} = m^d \mod n$
+\end{enumerate}
+
+Can be used for anonymous signatures on e-cash, e-voting\dots
+
+\subsection{Certificates}
+A certificate is a public key that has been signed by a thrusted third party.
+
+\section{Diffie-Hellman Key Exchange}
+
+Using a generator $g$ in a finite cyclic group:
+
+\begin{align*}
+  A &\longrightarrow B: A, g^{s_A} \\
+  B &\longrightarrow A: B, g^{s_B} \\
+\end{align*}
+
+Then $K_{AB} = g^{s_A s_B} = (g^{s_A})^{s_B} = (g^{s_A})^{s_B}$.
+
+This is not authentication!
+
+\section{El-Gamal}
+Fix a generator $g \in G$ of size $N$. \\
+Private key: $n \in \mathbb{N}$ with $n < N$. \\
+Public key: $h = g^n \in G$.
+
+\subsection{Encryption / Decryption}
+\subsubsection{Encryption}
+
+\begin{enumerate}
+  \item Represent message as $m \in G$.
+  \item Choose a random $r < N$.
+  \item $\{m\}_h = (g^r, m \cdot h^r)$.
+\end{enumerate}
+
+\subsubsection{Decryption}
+\begin{enumerate}
+  \item Ciphertext $c = (c_1,c_2)$ with $c_i \in G$.
+  \item \[
+      [(c_1, c_2)]_n = \frac{c_2}{(c_1)^n} = \frac{m \cdot h^r}{(g^r)^n} = \frac{m \cdot (g^n)^r}{(g^r)^n} = m
+    \]
+\end{enumerate}
+
+
+\subsubsection{Signatures}
+
+Choose random $r < p-1$ in $\Z^*_p$ with $\gcd(r,p-1) = 1$ and then:
+\[
+  \operatorname{sign}_n(m) = \left( g^r, \frac{H(m) - n \cdot g^r}{r} \mod p-1 \right)
+\]
+
+Verification of signature $(s_1, s_2)$:
+\[
+  g^{H(m)} \overset{??}{=} s_1^{s_2} \cdot h^{s_1}
+\]
+
+
+\end{document}
