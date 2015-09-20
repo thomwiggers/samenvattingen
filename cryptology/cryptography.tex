@@ -1,8 +1,16 @@
 \documentclass{article}
 
 \usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{cancel}
 \usepackage{amsfonts}
 \usepackage{a4wide}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
 
 \newcommand{\wmod}[1]{\pmod{#1}}
 \newcommand{\ZZ}{\mathbb{Z}}
@@ -13,6 +21,7 @@
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\egcd}{\operatorname{xgcd}}
 \newcommand{\xgcd}{\operatorname{xgcd}}
+\newcommand{\mchar}{\operatorname{char}}
 
 \newcommand{\ZZx}[1]{(\ZZ_{/#1})^\times}
 
@@ -192,6 +201,96 @@ $4$ in each computation, do this twice, so save a factor of 2. Combine $m_p$ and
 $m_q$ using CRT to get m, this needs just one multiplication given $u = p^{-1}
 \pmod q$, $v = q^{-1} \pmod p$. Then $m = m_p \cdot q \cdot v + p \cdot u \cdot
 m_q$.
+
+\section{Finite Fields}
+
+\begin{definition}
+    A set $K$ is a \textbf{field} with respect to $\circ$ and $\diamond$, denoted $(K, \circ, \diamond)$ if:
+
+    \begin{enumerate}
+        \item $(K, \circ)$ is een abelian group.
+        \item $(K^* = K\setminus \{e_\circ\}, \diamond)$ is an abelian group.
+        \item Distributivity holds in $K$: $a \diamond (b \circ c) = a \diamond b \circ a \diamond c$.
+    \end{enumerate}
+
+\end{definition}
+
+\begin{definition}
+    A group $(K, \Box)$ is \textbf{abelian} if these properties hold:
+
+    \begin{description}
+        \item[Closure] $\forall a, b \in K, \, a \Box b \in K$.
+        \item[Associativity] $\forall a,b \in K, \, (a \Box b) \Box c = a \Box (b \Box c)$
+        \item[Identity] $\exists e_\circ \in K, \, \forall a \in K, \,  a \Box e_0 = a$
+        \item[Invertibility] $\forall a \in K, \, \exists b \in K, \, a \Box b = e_\circ$
+        \item[Commutativity] $\forall a, b \in K, \, a \Box b = b \Box a$.
+    \end{description}
+\end{definition}
+
+Examples of fields and non-fields:
+\begin{tabular}{ll}
+    $(\NN, +, \cdot)$ & isn't a field: no negative numbers \\
+    $(\ZZ, +, \cdot)$ & isn't a field: no inverse          \\
+    $(\QQ, +, \cdot)$ & is a field                         \\
+\end{tabular}
+
+\begin{definition}
+    If $(K, \circ, \diamond)$ and $(L, \circ, \diamond)$ are fields and $K \subseteq L$
+    then $K$ is a \textbf{subfield} of $L$.
+\end{definition}
+
+\begin{definition}
+    Let $L$ be a field and $K$ be its subfield. The \textbf{extension degree}, denoted as $[L:K]$
+    is defined as $\operatorname{dim}_K L$, the dimension of $L$ as a $K$ vectorspace.
+\end{definition}
+
+\begin{definition}\label{def:characteristic}
+    Let $K$ be a field. The \textbf{characteristic} of $K$, $\operatorname{char}(K)$ is the
+    smallest positive integer $m$ such that
+    $\underbrace{e_\diamond \circ e_\diamond \circ \dots \circ e_\diamond}_{m} = e_\circ$.
+    If there is no such $m$, then $\operatorname{char}(K) = 0$.
+\end{definition}
+
+\begin{lemma}
+    The characteristic of a field is either 0 or prime.
+\end{lemma}
+
+\begin{proof}
+    Let $(K, \circ, \diamond)$ be a field with $\mchar(K) = n$ and
+    $n > 0$. Assume $n$ isn't prime so $n = a \cdot b$ with $1 < a, b <n$.
+
+    Then we have
+    \begin{equation}\label{eq:proofcharprime1}
+        e_\circ = [n]e_\diamond = [a]e_\diamond \diamond [b]e_\diamond.
+    \end{equation}.
+
+    We can show this by
+    \begin{align*}
+          & [a] e_\diamond \diamond [b]e_\diamond                                             \\
+          & = (e_\diamond \circ [a-1] e_\diamond) \diamond [b] e_\diamond                     \\
+          & = e_\diamond \diamond [b]e_\diamond \circ [a-1] e_\diamond \diamond [b]e_\diamond \\
+          & = \cancel{e_\diamond} \diamond [b]e_\diamond \circ [a-1] e_\diamond \diamond [b]e_\diamond & \mbox{(identity)} \\
+          &\vdots \\
+          & = \underbrace{[b] e_\diamond \circ [b] e_\diamond \circ \dots [b] e_\diamond}_\text{$a$ times} \\
+          & = [a \cdot b] e_\diamond
+    \end{align*}
+
+    So \eqref{eq:proofcharprime1} is true, so either $[a]e_\diamond = e_\circ$ or $[b]e_\diamond = e_\circ$.
+    But by Definition \ref{def:characteristic} then $a$ or $b$ would be the characteristic of $K$. So the
+    characteristic can't be the product of two integers.
+
+    So any characteristic $n > 0$ must be prime. The characteristic can be 0 by
+    Definition \ref{def:characteristic}. So the characteristic must be either
+    0 or prime.
+\end{proof}
+
+\begin{lemma}
+    A finite field $K$ has $\mchar(K) \ne 0$, so $\mchar(K)$ is prime.
+\end{lemma}
+\begin{proof}
+    Since $K$ is finite, there must be $i, j \in \NN$ with $[i]e_\diamond = [j]e_\diamond$.
+    Let $i > j$, then $[i-j] e_\diamond = e_\circ$. And so $\mchar(K)|(i-j)$.
+\end{proof}
 
 \section {Security course}
 \section{Security Goals}
