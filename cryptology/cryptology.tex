@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
+\usepackage{subcaption}
 \usepackage{cancel}
 \usepackage{amsfonts}
 \usepackage{a4wide}
@@ -19,6 +20,9 @@
 \newcommand{\N}{\NN}
 \newcommand{\QQ}{\mathbb{Q}}
 \newcommand{\CC}{\mathbb{C}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\GF}{\operatorname{GF}}
 \newcommand{\egcd}{\operatorname{xgcd}}
 \newcommand{\xgcd}{\operatorname{xgcd}}
 \newcommand{\mchar}{\operatorname{char}}
@@ -121,7 +125,7 @@ $1$ is the neutral element and $G$ is written multiplicatively.
 
 eg. $a^6 \equiv 1 \pmod{7}$ for $a \in \ZZx{7}$.
 
-\section{RSA}
+\subsection{RSA}
 
 Pick two large primes $p, q$, with $p \ne q$. Put $n = pq$ and compute $\phi(n) = (p-1)(q-1)$.
 Pick an $e$ coprime $\phi(n)$. Compute $d \equiv e^{-1} \pmod{\phi(n)}$ using $\xgcd$.
@@ -202,7 +206,7 @@ $m_q$ using CRT to get m, this needs just one multiplication given $u = p^{-1}
 \pmod q$, $v = q^{-1} \pmod p$. Then $m = m_p \cdot q \cdot v + p \cdot u \cdot
 m_q$.
 
-\section{Finite Fields}
+\section{Lecture 3 Finite Fields}
 
 \begin{definition}
     A set $K$ is a \textbf{field} with respect to $\circ$ and $\diamond$, denoted $(K, \circ, \diamond)$ if:
@@ -262,7 +266,7 @@ Examples of fields and non-fields:
     Then we have
     \begin{equation}\label{eq:proofcharprime1}
         e_\circ = [n]e_\diamond = [a]e_\diamond \diamond [b]e_\diamond.
-    \end{equation}.
+    \end{equation}
 
     We can show this by
     \begin{align*}
@@ -291,6 +295,133 @@ Examples of fields and non-fields:
     Since $K$ is finite, there must be $i, j \in \NN$ with $[i]e_\diamond = [j]e_\diamond$.
     Let $i > j$, then $[i-j] e_\diamond = e_\circ$. And so $\mchar(K)|(i-j)$.
 \end{proof}
+
+A field $K$ with $\mchar(K) = p$ forms a ring inside the field as
+$e_\diamond, [2]e_\diamond, \dots, [p-1] e_\diamond, e_\circ, e_\diamond, \dots$.
+
+A finite field maps to $\ZZ/p\ZZ$ as $[i] e_\diamond \mapsto i + p\ZZ$ or $[i]
+e_\diamond \mapsto i \mod p$.
+
+\begin{definition}
+    A \textbf{primefield} is the smallest subfield contained in a field $K$.
+\end{definition}
+
+\begin{lemma}
+    Let $K$ be a finite field of $\mchar(K) = p$. Then there is a primefield of
+    $K$ that is isomorphic to $\ZZ/p\ZZ$.
+
+    \begin{align*}
+        e_\circ \mapsto 0 & \text{ in $\ZZ/p\ZZ$} \\
+        e_\diamond \mapsto 1 & \text{ in $\ZZ/p\ZZ$} \\
+    \end{align*}
+
+    The vectorspace as linearly independant vectors $\alpha_1, \alpha_2, \dots,
+    \alpha_n$ with n the dimension. Every element in the field can be written as
+    \[ \sum^n_{i=1} c_i \alpha_i \text{ with } c_i \in \ZZ/p\ZZ.\]
+
+\end{lemma}
+
+
+\begin{lemma}
+    Let $K$ be a finite field. There exists a prime $p$ and an integer $n \in \NN_{>0}$ such
+    that $|K| = p^n$ and $\mchar(K) = p$. (\emph{Notation:} $\FF_{p^n}$ or $\GF(p^n)$.)
+
+    \[ \left(\sum_{i=1}^n c_i \alpha_i\right) + \left(\sum_{i=1}^n d_i \alpha_i\right)
+        = \sum_{i=1}^n (c_i + d_i)\alpha_i \]
+
+    so $+ \to \circ$ and $\cdot \to \diamond$.
+
+\end{lemma}
+
+\begin{lemma}
+    Let $K$ be a finite field. The multiplicative group $K^*$ is cyclic.
+
+    Thus, for every $a \in K^*$ we have $a^{p^{n}-1} = 1$.
+\end{lemma}
+\begin{proof}
+    \[ a^{p^n} = a \Leftrightarrow a \cdot a^{p^{n}-1} = 1 \cdot a \Leftrightarrow a^{p^{n}-1} = 1 \]
+\end{proof}
+
+\begin{definition}
+    \textbf{Polynomial ring over field $K$}
+
+    \begin{align*}
+        K[x] &= \left\{ \sum_{i=1}^n a_i x^i | n \in \NN, a_i \in K \right\} \\
+        f &\in K[x] \\
+        f &= \sum f_i x^i
+    \end{align*}
+
+\end{definition}
+
+\begin{definition}
+    A polynomial $f \in K[x]$ is called \textbf{irreducible} if $\deg(f) \ge 1$ and it cannot be
+    written as the product of polynomials with a smaller degree.
+\end{definition}
+
+Some examples
+\begin{align*}
+    x^2 - 1 & = (x-1)(x+1) & \text{reducible in $\RR[x]$}  \\
+    x^2 + 1 &              & \text{irreducible in $\RR[x]$} \\
+    x^2 + 1 & = (x - i)(x + i) & \text{reducible in $\CC[x]$}
+\end{align*}
+
+\section{Lecture 4: finite fields continued}
+
+An example of $\GF(4)$ with symbols can be found in Table \ref{tab:gf4examplesymb}.
+
+\begin{table}[h]
+    \centering
+    \begin{subfigure}[b]{.25\textwidth}
+        \begin{tabular}{c|cccc}
+            $+$ & $\Box$ & $\circ$ & $\star$ & $\bigtriangleup$ \\ \hline
+            $\Box$ & $\Box$ & $\circ$ & $\star$ & $\bigtriangleup$ \\
+            $\circ$ & $\circ$ & $\Box$ & $\bigtriangleup$ & $\star$ \\
+            $\star$ & $\star$ & $\bigtriangleup$ & $\Box$ & $\circ$ \\
+            $\bigtriangleup$ & $\bigtriangleup$ & $\star$ & $\circ$ & $\Box$
+        \end{tabular}
+    \end{subfigure}
+    \begin{subfigure}[b]{.25\textwidth}
+        \begin{tabular}{c|ccc}
+            $\cdot$ & $\circ$ & $\star$ & $\bigtriangleup$ \\ \hline
+            $\circ$ & $\circ$ & $\star$ & $\bigtriangleup$ \\
+            $\star$ & $\star$ & $\bigtriangleup$ & $\circ$ \\
+            $\bigtriangleup$ & $\bigtriangleup$ & $\circ$ & $\star$
+        \end{tabular}
+    \end{subfigure}
+    \caption{An example of $\GF(4)$ with addition and multiplication}
+    \label{tab:gf4examplesymb}
+\end{table}
+
+$\GF(4) = \GF(2^2) = \GF(2)^2$
+
+\[\GF(4) = \left( \left\{
+    \begin{pmatrix} 0 \\ 0 \end{pmatrix},
+    \begin{pmatrix} 0 \\ 1 \end{pmatrix},
+    \begin{pmatrix} 1 \\ 0 \end{pmatrix},
+    \begin{pmatrix} 1 \\ 1 \end{pmatrix},
+\right\}, +, \cdot \right). \]
+
+Basis:
+
+    \[ \alpha_1 = \begin{pmatrix} 0 \\ 1 \end{pmatrix} \qquad
+       \alpha_2 = \begin{pmatrix} 1 \\ 0 \end{pmatrix} \]
+\begin{align*}
+    \begin{pmatrix} 0 \\ 0 \end{pmatrix} &= 0 \cdot \alpha_1 + 0 \cdot \alpha_2 = 0 &
+    \begin{pmatrix} 1 \\ 0 \end{pmatrix} &= 0 \cdot \alpha_1 + 1 \cdot \alpha_2 = \alpha_2 \\
+    \begin{pmatrix} 0 \\ 1 \end{pmatrix} &= 1 \cdot \alpha_1 + 0 \cdot \alpha_2 = \alpha_1 &
+    \begin{pmatrix} 1 \\ 1 \end{pmatrix} &= 1 \cdot \alpha_1 + 1 \cdot \alpha_2 = \alpha_1 + \alpha_2
+\end{align*}
+
+We can instead use basis $1, a$.
+\begin{align*}
+    0 \cdot a + 0 \cdot 1 &= 0 &
+    1 \cdot a + 0 \cdot 1 &= a \\
+    0 \cdot a + 1 \cdot 1 &= 1 &
+    1 \cdot a + 1 \cdot 1 &= a + 1
+\end{align*}
+
+This base vector representation is nice for addition but does not help for
+multiplication.
 
 \section {Security course}
 \section{Security Goals}
