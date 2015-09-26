@@ -1,12 +1,11 @@
 """
 Solves the DLP for divisible phi
 
-    >>> p = 1013
     >>> G = GF(p)
     >>> g = G(3)
     >>> h = G(321)
 
-    >>> pohlighellman(g, h, p)
+    >>> pohlighellman(g, h)
     testing n = 253
     h^253 = 1012
     Testing g^(0 * 253) == 1012
@@ -42,22 +41,22 @@ Solves the DLP for divisible phi
     Found x mod 23 = 13
     358
 """
-from sage.all import euler_phi, factor, crt
+from sage.all import factor, crt
 
 
-def pohlighellman(g, h, p):
-    phi = euler_phi(p)
+def pohlighellman(g, h):
+    phi = g.multiplicative_order()
     factors = factor(phi)
     chinese_pairs = []
     for pi, ei in factors:
         n = phi / (pi**ei)
-        print("testing n = %d" % n)
+        print("testing n = %s" % n)
         hn = h**n
-        print("h^%d = %d" % (n, hn))
+        print("h^%s = %s" % (n, hn))
         for i in range(pi**ei):
-            print("Testing g^(%d * %d) == %d" % (i, n, hn))
+            print("Testing g^(%s * %s) == %s" % (i, n, hn))
             if g**(n * i) == hn:
-                print("Found x mod %d = %d" % (pi**ei, i))
+                print("Found x mod %s = %s" % (pi**ei, i))
                 chinese_pairs.append([i, pi**ei])
                 break
 
